@@ -1,6 +1,7 @@
 from ytmusicapi import YTMusic
 import re
 
+
 def check_search_result(search_result, song):
     for result in search_result:
         if result['resultType'] == 'song' and result['title'] == song['title']:
@@ -19,11 +20,14 @@ def __main__ ():
         'duration': match.group(3)
     } for index, match in enumerate(matches, start=1)]
     print('Found ' + str(len(songs)) + ' songs.')
-    # ytm_headers_filepath = input('YTMusic headers filepath: ')
-    # ytm_headers_raw = open(ytm_headers_filepath).read()
+    raw_headers = input('YTMusic raw headers (leave blank to skip this step): ')
+    if raw_headers:
+        YTMusic.setup(filepath='ytmheaders.json', headers_raw=raw_headers)
     ytm = YTMusic('ytmheaders.json')
-    # ytm.setup(filepath='ytmheaders.json', headers_raw=ytm_headers_raw)
     playlist = ytm.create_playlist('Imported from VK', 'Contains songs automatically imported from VK')
+    if 'error' in playlist and '401' in playlist:
+        print('[!] Error while creating playlist. Aborting...')
+        return
     print('Created playlist with Id: ' + str(playlist))
     unfound = []
     found_count = 0
